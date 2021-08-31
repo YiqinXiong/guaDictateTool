@@ -10,6 +10,7 @@ Author: Yiqin Xiong
 Create: August 2021
 """
 import os
+import random
 import sys
 from shutil import copyfile
 
@@ -17,7 +18,7 @@ from PyQt5.QtGui import QIcon, QCursor, QKeySequence
 from PyQt5.QtWidgets import QWidget, QDesktopWidget, QApplication, QMainWindow, QMessageBox, QInputDialog, QFileDialog, \
     QHeaderView, QTableWidgetItem, QAbstractItemView, QMenu, QUndoStack, QUndoCommand
 from guaWindow import Ui_MainWindow
-from PyQt5.QtCore import Qt, pyqtSlot
+from PyQt5.QtCore import Qt, pyqtSlot, QTimer
 from PyQt5.QtSql import QSqlDatabase, QSqlQuery
 import sqlite3
 
@@ -35,11 +36,24 @@ class MWindow(QMainWindow, Ui_MainWindow):
         self.tableWidget_add_word.setContextMenuPolicy(Qt.CustomContextMenu)
         self.pushButton_search_word.setShortcut("Return")
         self.pushButton_add_word_save.setShortcut("Ctrl+S")
-
+        self.tableWidget_add_word.horizontalHeader().setVisible(True)
+        self.timer = QTimer()
+        self.label_word.setDisabled(True)
+        self.label_chinese_attr.setDisabled(True)
+        self.pushButton_get_answer.setDisabled(True)
+        self.pushButton_add_to_notebook.setDisabled(True)
+        self.pushButton_next_word.setDisabled(True)
+        self.progressBar_finish.setValue(0)
+        self.lineEdit_input_attr.setDisabled(True)
+        self.lineEdit_input_chinese.setDisabled(True)
         # private variables
         self.db = 'save.db'
         self.undo_stack = QUndoStack()
         self.previous_cell_text = None
+        self.dict_time = 30  # 默认每个单词思考30秒
+        self.choices = None
+        self.cur_dict_idx = 0
+        self.in_dictating = False
         # init actions
         self.undo_action = self.undo_stack.createUndoAction(self, '撤销')
         self.redo_action = self.undo_stack.createRedoAction(self, '重做')
@@ -49,7 +63,6 @@ class MWindow(QMainWindow, Ui_MainWindow):
         self.addAction(self.redo_action)
         # connect SIGNALS and SLOTS
         self.tableWidget_add_word.customContextMenuRequested.connect(self.tableWidget_add_word_showMenu)
-        self.pushButton_next_word.clicked.connect(self.pushButton_next_word_clicked)
         self.tabWidget.currentChanged.connect(self.tabWidget_currentChanged)
         self.pushButton_add.clicked.connect(self.tableWidget_add_word_insert_behind)
         self.pushButton_remove.clicked.connect(self.tableWidget_add_word_delete_selected)
@@ -68,6 +81,12 @@ class MWindow(QMainWindow, Ui_MainWindow):
         self.comboBox_lesson.activated.connect(self.pushButton_search_word_clicked)
         self.pushButton_history.clicked.connect(self.pushButton_history_clicked)
         self.listWidget_history.itemClicked.connect(self.listWidget_history_itemClicked)
+        self.pushButton_range_start1.clicked.connect(self.pushButton_range_start1_clicked)
+        self.pushButton_range_start2.clicked.connect(self.pushButton_range_start2_clicked)
+        self.timer.timeout.connect(self.timer_timeout)
+        self.pushButton_get_answer.clicked.connect(self.pushButton_get_answer_clicked)
+        self.pushButton_add_to_notebook.clicked.connect(self.pushButton_add_to_notebook_clicked)
+        self.pushButton_next_word.clicked.connect(self.pushButton_next_word_clicked)
         # actions after init
         self._check_db_exist()
         self._flush_tab_1()
@@ -113,28 +132,66 @@ class MWindow(QMainWindow, Ui_MainWindow):
         # 写入数据库
         conn = self._connect_to_db()
         cur = conn.cursor()
-        cur.executemany("INSERT INTO dict VALUES (?,?,?,?,?)", dict_data)
-        if len(data.sheets()) == 2:
-            cur.executemany("INSERT INTO notebook VALUES (?,?)", notebook_data)
-        cur.close()
-        conn.commit()
-        conn.close()
+        try:
+            cur.executemany("INSERT INTO dict VALUES (?,?,?,?,?)", dict_data)
+            if len(data.sheets()) == 2:
+                cur.executemany("INSERT INTO notebook VALUES (?,?)", notebook_data)
+            conn.commit()
+        except Exception as e:
+            print(f'_import_excel_to_sqlite: {e}')
+            conn.rollback()
+        finally:
+            cur.close()
+            conn.close()
 
-    # 从sqlite读取内容到tableWidget
-    def _get_all_data_from_table(self, table_name):
+    # 对sqlite进行[查]操作
+    def _get_sql_data(self, sql_query):
         conn = self._connect_to_db()
         cur = conn.cursor()
-        cur.execute(f"SELECT * FROM {table_name} ORDER BY year DESC, text, word")
-        return cur.fetchall()
+        try:
+            cur.execute(sql_query)
+            data = cur.fetchall()
+        except Exception as e:
+            print(f'_get_sql_data: {e}')
+            data = []
+        finally:
+            cur.close()
+            conn.close()
+        return data
+
+    # 对sqlite进行[增删改]操作
+    def _change_sql_data(self, sql_query):
+        conn = self._connect_to_db()
+        cur = conn.cursor()
+        try:
+            cur.execute(sql_query)
+            conn.commit()
+        except Exception as e:
+            print(f'_change_sql_data: {e}')
+            conn.rollback()
+        finally:
+            cur.close()
+            conn.close()
 
     # sqlite的create table建立dict和notebook两个表的结构
     def _create_new_db(self):
         conn = sqlite3.connect(self.db)
         cur = conn.cursor()
-        cur.execute(
-            "CREATE TABLE IF NOT EXISTS dict(year INTEGER,text INTEGER,word TEXT NOT NULL PRIMARY KEY,attr TEXT,chinese TEXT)")
-        cur.execute(
-            "CREATE TABLE IF NOT EXISTS notebook(word TEXT NOT NULL PRIMARY KEY,count INTEGER,CONSTRAINT FK_Notebook FOREIGN KEY (word) REFERENCES dict(word))")
+        try:
+            cur.execute(
+                "CREATE TABLE IF NOT EXISTS "
+                "dict(year INTEGER,text INTEGER,word TEXT NOT NULL PRIMARY KEY,attr TEXT,chinese TEXT)")
+            cur.execute(
+                "CREATE TABLE IF NOT EXISTS "
+                "notebook(word TEXT NOT NULL PRIMARY KEY,count INTEGER,"
+                "CONSTRAINT FK_Notebook FOREIGN KEY (word) REFERENCES dict(word))")
+            conn.commit()
+        except Exception as e:
+            print(f'_create_new_db: {e}')
+            conn.rollback()
+        finally:
+            cur.close()
+            conn.close()
 
     # 连接到sqlite，返回conn
     def _connect_to_db(self):
@@ -162,25 +219,70 @@ class MWindow(QMainWindow, Ui_MainWindow):
         else:
             query = f"SELECT * FROM dict WHERE year = '{year}' AND text = '{text}' AND word LIKE '%{keyword}%' " \
                     f"ORDER BY year DESC, text, word"
-        try:
-            conn = self._connect_to_db()
-            cur = conn.cursor()
-            cur.execute(query)
-            data = cur.fetchall()
-        except Exception as e:
-            print(f'pushButton_search_word_clicked: {e}')
-            data = []
-        finally:
-            cur.close()
-            conn.close()
+        data = self._get_sql_data(query)
         # 设置表格内容
         set_data_to_tableWidget(self.tableWidget_search_word, data)
+
+    def _reset_dict_ui(self):
+        self.label_word.setText('单词在这里')
+        self.label_word.setDisabled(True)
+        self.label_chinese_attr.setText('词性和中文在这里')
+        self.label_chinese_attr.setDisabled(True)
+        self.label_finish.setText(f'完成{self.cur_dict_idx} / {self.progressBar_finish.maximum()}')
+        self.progressBar_finish.setValue(self.cur_dict_idx)
+        self.lcdNumber_timer.setStyleSheet("")
+        self._reset_dict_time()
+        self.lcdNumber_timer.display(self.dict_time)
+        self.lineEdit_input_attr.clear()
+        self.lineEdit_input_chinese.clear()
+        self.pushButton_get_answer.setDisabled(False)
+        self.pushButton_add_to_notebook.setDisabled(False)
+
+    def _show_word(self):
+        # ui相关
+        self._reset_dict_ui()
+        # 内容相关
+        self.label_word.setDisabled(False)
+        self.label_word.setText(self.choices[self.cur_dict_idx][0])
+        self.timer.start(1000)
+
+    # 重置听写倒计时
+    def _reset_dict_time(self):
+        self.dict_time = 30
+
+    # 开始听写
+    def _start_dict(self, data):
+        num = self.spinBox_num.value()
+        # 数据相关
+        weight = [int(((d[3] + 1) ** 0.5) * 10) for d in data]  # 神奇的开根号除以10算法
+        self.choices = random.choices(data, weight, k=num)
+        # ui相关
+        self.progressBar_finish.setMaximum(num)
+        self.label_word.setDisabled(False)
+        self.pushButton_range_start1.setDisabled(True)
+        self.pushButton_range_start2.setDisabled(True)
+        self.pushButton_get_answer.setDisabled(False)
+        self.pushButton_add_to_notebook.setDisabled(False)
+        self.pushButton_next_word.setDisabled(False)
+        self.spinBox_num.setDisabled(True)
+        self.spinBox_year.setDisabled(True)
+        self.spinBox_text_from.setDisabled(True)
+        self.spinBox_text_to.setDisabled(True)
+        self.lineEdit_input_attr.setDisabled(False)
+        self.lineEdit_input_chinese.setDisabled(False)
+        # 开始听写
+        self.in_dictating = True
+        self.cur_dict_idx = -1
+        try:
+            self.pushButton_next_word_clicked()
+        except Exception as e:
+            print(f'_start_dict:{e}')
 
     # 刷新加新词页面
     def _flush_tab_1(self):
         # tableWidget相关
         self.tableWidget_add_word.clearContents()
-        data = self._get_all_data_from_table('dict')
+        data = self._get_sql_data("SELECT * FROM dict ORDER BY year DESC, text, word")
         set_data_to_tableWidget(self.tableWidget_add_word, data)
 
     # 刷新查词页面
@@ -212,14 +314,10 @@ class MWindow(QMainWindow, Ui_MainWindow):
 
         # tableWidget相关
         self.tableWidget_search_word.clearContents()
-        data = self._get_all_data_from_table('dict')
+        data = self._get_sql_data("SELECT * FROM dict ORDER BY year DESC, text, word")
         set_data_to_tableWidget(self.tableWidget_search_word, data)
 
     ################## 槽函数（SLOT） #################
-
-    # 点击听写页面的”下一个“时触发
-    def pushButton_next_word_clicked(self):
-        QMessageBox.information(self, '标题你刚才点了下一个！', '你刚才点了下一个！')
 
     # 切换页面时触发
     def tabWidget_currentChanged(self):
@@ -228,15 +326,23 @@ class MWindow(QMainWindow, Ui_MainWindow):
         if idx == 0:
             # 加新词页面
             print('切换到加新词页面')
+            if self.in_dictating:
+                self.timer.stop()
         elif idx == 1:
             # 查单词页面
             print('切换到查单词页面')
+            if self.in_dictating:
+                self.timer.stop()
         elif idx == 2:
             # 听写页面
             print('切换到听写页面')
+            if self.in_dictating:
+                self.timer.start()
         elif idx == 3:
             # 复习单词本页面
             print('切换到复习单词本页面')
+            if self.in_dictating:
+                self.timer.stop()
         else:
             pass
 
@@ -274,7 +380,7 @@ class MWindow(QMainWindow, Ui_MainWindow):
         insert = InsertCommand(self.tableWidget_add_word, self.tableWidget_add_word.rowCount())
         self.undo_stack.push(insert)
 
-    # 从tableWidget保存内容到sqlite
+    # 点击加新词页面的”SAVE“按钮后触发
     def pushButton_add_word_save_clicked(self):
         row_count = self.tableWidget_add_word.rowCount()
         col_count = self.tableWidget_add_word.columnCount()
@@ -312,6 +418,7 @@ class MWindow(QMainWindow, Ui_MainWindow):
             self.setWindowTitle('LTH的单词听写机')
         self._flush_tab_2()
 
+    # 加新词页面表格的内容修改后触发
     def tableWidget_add_word_itemChanged(self):
         print(f'tableWidget_add_word_itemChanged: {self.previous_cell_text}')
         if self.previous_cell_text is None:
@@ -324,6 +431,7 @@ class MWindow(QMainWindow, Ui_MainWindow):
             self.undo_stack.push(change_item)
         self.previous_cell_text = None
 
+    # 双击加新词页面表格的单元格时触发
     def tableWidget_add_word_cellDoubleClicked(self, row, col):
         item = self.tableWidget_add_word.item(row, col)
         print(
@@ -332,6 +440,8 @@ class MWindow(QMainWindow, Ui_MainWindow):
         text = item.text() if item is not None else ''
         self.previous_cell_text = (row, col, text)
 
+    # 点击”快查一下“时触发
+    @pyqtSlot()
     def pushButton_search_word_clicked(self):
         # 获取查询条件
         year = self.comboBox_year.currentText()
@@ -341,9 +451,12 @@ class MWindow(QMainWindow, Ui_MainWindow):
         self._search_by_condition(year, text, keyword)
         self.listWidget_history.addItem(f'[{year}], [{text}], [{keyword}]')
 
+    # 点击清空搜索历史记录时触发
+    @pyqtSlot()
     def pushButton_history_clicked(self):
         self.listWidget_history.clear()
 
+    # 点击搜索记录里的条目时触发
     def listWidget_history_itemClicked(self, item):
         text = item.text()
         # 获取查询条件
@@ -352,6 +465,100 @@ class MWindow(QMainWindow, Ui_MainWindow):
             print("查询条件解析错误！")
         year, text, keyword = [con[1:-1] for con in conditions]
         self._search_by_condition(year, text, keyword)
+
+    # 点击”全部随机，立即开始“时触发
+    @pyqtSlot()
+    def pushButton_range_start1_clicked(self):
+        data = self._get_sql_data(
+            "select dict.word,attr,chinese,case when count is null then 0 else count end "
+            "from dict left join notebook n on dict.word = n.word")
+        print(data)
+        if len(data) == 0:
+            QMessageBox.warning(self, '听写失败', '没有单词可供听写')
+        else:
+            self._start_dict(data)
+
+    # 点击”选好范围，立即开始“时触发
+    @pyqtSlot()
+    def pushButton_range_start2_clicked(self):
+        year = self.spinBox_year.value()
+        text_from = self.spinBox_text_from.value()
+        text_to = self.spinBox_text_to.value()
+        if text_from > text_to:
+            text_from, text_to = text_to, text_from
+        data = self._get_sql_data(
+            f"select dict.word,attr,chinese,case when count is null then 0 else count end "
+            f"from dict left join notebook n on dict.word = n.word "
+            f"where dict.year = {year} and dict.text between {text_from} and {text_to}")
+        print(data)
+        if len(data) == 0:
+            QMessageBox.warning(self, '听写失败', '该范围没有单词可供听写')
+        else:
+            self._start_dict(data)
+
+    def timer_timeout(self):
+        if self.dict_time > 0:
+            if self.dict_time <= 5:
+                self.lcdNumber_timer.setStyleSheet("color: rgb(255, 0, 0)")
+            self.dict_time -= 1
+            self.lcdNumber_timer.display(self.dict_time)
+            self.timer.start(1000)  # 开始下一秒的计时
+        else:
+            QMessageBox.information(self, '已超时', '超时啦，自动添加到错题本')
+            self.pushButton_add_to_notebook_clicked()
+            self.timer.stop()
+            self.pushButton_next_word_clicked()
+
+    # 点击听写页面的”查看答案“时触发
+    @pyqtSlot()
+    def pushButton_get_answer_clicked(self):
+        try:
+            self.pushButton_get_answer.setDisabled(True)
+            cur_choice = self.choices[self.cur_dict_idx]
+            self.label_chinese_attr.setDisabled(False)
+            self.label_chinese_attr.setText(f'{cur_choice[1]}  {cur_choice[2]}')
+        except Exception as e:
+            print(f'pushButton_get_answer_clicked:{e}')
+
+    # 点击听写页面的”添加到单词复习本“时触发
+    @pyqtSlot()
+    def pushButton_add_to_notebook_clicked(self):
+        self.pushButton_add_to_notebook.setDisabled(True)
+        cur_choice = self.choices[self.cur_dict_idx]
+        word = cur_choice[0]
+        count = cur_choice[3] + 1
+        sql_query = f"replace into notebook(word,count) values ('{word}',{count})"
+        self._change_sql_data(sql_query)
+        self.pushButton_get_answer_clicked()
+
+    # 点击听写页面的”下一个“时触发
+    @pyqtSlot()
+    def pushButton_next_word_clicked(self):
+        self.cur_dict_idx += 1
+        try:
+            if self.cur_dict_idx >= self.progressBar_finish.maximum():
+                # 听写结束
+                self.in_dictating = False
+                self.timer.stop()
+                QMessageBox.information(self, "听写结束",
+                                        f"完成了一轮听写（{self.progressBar_finish.maximum()}个单词），牛蹄滑给力奥！")
+                self.cur_dict_idx = 0
+                self._reset_dict_ui()
+                self.label_word.setDisabled(True)
+                self.pushButton_range_start1.setDisabled(False)
+                self.pushButton_range_start2.setDisabled(False)
+                self.pushButton_get_answer.setDisabled(True)
+                self.pushButton_add_to_notebook.setDisabled(True)
+                self.pushButton_next_word.setDisabled(True)
+                self.spinBox_num.setDisabled(False)
+                self.spinBox_year.setDisabled(False)
+                self.spinBox_text_from.setDisabled(False)
+                self.spinBox_text_to.setDisabled(False)
+                self.label_finish.setText(f'完成{self.cur_dict_idx} / {0}')
+            else:
+                self._show_word()
+        except Exception as e:
+            print(f'pushButton_next_word_clicked: {e}')
 
 
 class InsertCommand(QUndoCommand):

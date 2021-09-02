@@ -336,7 +336,7 @@ class MWindow(QMainWindow, Ui_MainWindow):
         finally:
             cur.close()
             conn.close()
-        print(years, texts)
+        # print(years, texts)
         self.comboBox_year.addItems(years)
         self.comboBox_lesson.addItems(texts)
 
@@ -370,22 +370,22 @@ class MWindow(QMainWindow, Ui_MainWindow):
         idx = sender.currentIndex()
         if idx == 0:
             # 加新词页面
-            print('切换到加新词页面')
+            # print('切换到加新词页面')
             if self.in_dictating:
                 self.timer.stop()
         elif idx == 1:
             # 查单词页面
-            print('切换到查单词页面')
+            # print('切换到查单词页面')
             if self.in_dictating:
                 self.timer.stop()
         elif idx == 2:
             # 听写页面
-            print('切换到听写页面')
+            # print('切换到听写页面')
             if self.in_dictating:
                 self.timer.start()
         elif idx == 3:
             # 复习单词本页面
-            print('切换到复习单词本页面')
+            # print('切换到复习单词本页面')
             if self.in_dictating:
                 self.timer.stop()
         else:
@@ -498,7 +498,7 @@ class MWindow(QMainWindow, Ui_MainWindow):
 
     # 加新词页面表格的内容修改后触发
     def tableWidget_add_word_itemChanged(self):
-        print(f'tableWidget_add_word_itemChanged: {self.previous_cell_text}')
+        # print(f'tableWidget_add_word_itemChanged: {self.previous_cell_text}')
         if self.previous_cell_text is None:
             return
         row = self.previous_cell_text[0]
@@ -513,15 +513,14 @@ class MWindow(QMainWindow, Ui_MainWindow):
     # 双击加新词页面表格的单元格时触发
     def tableWidget_add_word_cellDoubleClicked(self, row, col):
         item = self.tableWidget_add_word.item(row, col)
-        print(
-            f'tableWidget_add_word_cellDoubleClicked: row {row}, col {col}, item {item}')
+        # print(f'tableWidget_add_word_cellDoubleClicked: row {row}, col {col}, item {item}')
         # self.tableWidget_add_word.cellActivated()
         text = item.text() if item is not None else ''
         self.previous_cell_text = (row, col, text)
 
     # 复习单词本页面表格的内容修改后触发
     def tableWidget_notebook_itemChanged(self):
-        print(f'tableWidget_notebook_itemChanged: {self.previous_cell_text_notebook}')
+        # print(f'tableWidget_notebook_itemChanged: {self.previous_cell_text_notebook}')
         if self.previous_cell_text_notebook is None:
             return
         row = self.previous_cell_text_notebook[0]
@@ -537,8 +536,7 @@ class MWindow(QMainWindow, Ui_MainWindow):
     # 双击单词复习本页面表格的单元格时触发
     def tableWidget_notebook_cellDoubleClicked(self, row, col):
         item = self.tableWidget_notebook.item(row, col)
-        print(
-            f'tableWidget_notebook_cellDoubleClicked: row {row}, col {col}, item {item}')
+        # print(f'tableWidget_notebook_cellDoubleClicked: row {row}, col {col}, item {item}')
         # self.tableWidget_add_word.cellActivated()
         text = item.text() if item is not None else ''
         self.previous_cell_text_notebook = (row, col, text)
@@ -550,7 +548,7 @@ class MWindow(QMainWindow, Ui_MainWindow):
         year = self.comboBox_year.currentText()
         text = self.comboBox_lesson.currentText()
         keyword = self.lineEdit_search_word.text()
-        print(f'search word: 年份:{year}，Text:{text}，关键词:{keyword}')
+        # print(f'search word: 年份:{year}，Text:{text}，关键词:{keyword}')
         self._search_by_condition(year, text, keyword)
         self.listWidget_history.addItem(f'[{year}], [{text}], [{keyword}]')
 
@@ -565,7 +563,8 @@ class MWindow(QMainWindow, Ui_MainWindow):
         # 获取查询条件
         conditions = text.split(', ')
         if len(conditions) != 3:
-            print("查询条件解析错误！")
+            QMessageBox.warning(self, '查询条件解析错误！', '请仔细检查一下搜索记录里的查询条件')
+            return
         year, text, keyword = [con[1:-1] for con in conditions]
         self._search_by_condition(year, text, keyword)
 
@@ -575,7 +574,7 @@ class MWindow(QMainWindow, Ui_MainWindow):
         data = self._get_sql_data(
             "select dict.word,attr,chinese,case when count is null then 0 else count end "
             "from dict left join notebook n on dict.word = n.word")
-        print(data)
+        # print(data)
         if len(data) == 0:
             QMessageBox.warning(self, '听写失败', '没有单词可供听写')
         else:
@@ -593,7 +592,7 @@ class MWindow(QMainWindow, Ui_MainWindow):
             f"select dict.word,attr,chinese,case when count is null then 0 else count end "
             f"from dict left join notebook n on dict.word = n.word "
             f"where dict.year = {year} and dict.text between {text_from} and {text_to}")
-        print(data)
+        # print(data)
         if len(data) == 0:
             QMessageBox.warning(self, '听写失败', '该范围没有单词可供听写')
         else:
@@ -773,7 +772,7 @@ def get_data_from_tableWidget(table_widget, rows, cols):
                 else:
                     row_data.append(table_widget.item(i, j).text())
         data.append(tuple(row_data))
-    print(f'get_all_data_from_tableWidget: {data}')
+    # print(f'get_all_data_from_tableWidget: {data}')
     return data
 
 

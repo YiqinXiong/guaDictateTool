@@ -18,7 +18,7 @@
     <item row="0" column="0">
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>2</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tab_1">
        <attribute name="title">
@@ -30,7 +30,7 @@
           <property name="font">
            <font>
             <family>Microsoft YaHei UI</family>
-            <pointsize>9</pointsize>
+            <pointsize>10</pointsize>
            </font>
           </property>
           <property name="title">
@@ -174,7 +174,8 @@ QPushButton:pressed{border-image: url(:/redo-undo/redo-1.png);}</string>
             <widget class="QTableWidget" name="tableWidget_add_word">
              <property name="font">
               <font>
-               <pointsize>10</pointsize>
+               <family>Microsoft YaHei UI</family>
+               <pointsize>11</pointsize>
               </font>
              </property>
              <property name="contextMenuPolicy">
@@ -225,6 +226,12 @@ QPushButton:pressed{border-image: url(:/redo-undo/redo-1.png);}</string>
        <layout class="QVBoxLayout" name="verticalLayout_3">
         <item>
          <widget class="QGroupBox" name="groupBox_2">
+          <property name="font">
+           <font>
+            <family>Microsoft YaHei UI</family>
+            <pointsize>10</pointsize>
+           </font>
+          </property>
           <property name="title">
            <string>快捷查词</string>
           </property>
@@ -233,6 +240,12 @@ QPushButton:pressed{border-image: url(:/redo-undo/redo-1.png);}</string>
             <layout class="QHBoxLayout" name="horizontalLayout_3">
              <item>
               <widget class="QLabel" name="label">
+               <property name="font">
+                <font>
+                 <family>Microsoft YaHei UI</family>
+                 <pointsize>11</pointsize>
+                </font>
+               </property>
                <property name="text">
                 <string>年份：</string>
                </property>
@@ -245,6 +258,12 @@ QPushButton:pressed{border-image: url(:/redo-undo/redo-1.png);}</string>
                  <width>100</width>
                  <height>0</height>
                 </size>
+               </property>
+               <property name="font">
+                <font>
+                 <family>Microsoft YaHei UI</family>
+                 <pointsize>11</pointsize>
+                </font>
                </property>
                <property name="currentText">
                 <string/>
@@ -266,6 +285,12 @@ QPushButton:pressed{border-image: url(:/redo-undo/redo-1.png);}</string>
              </item>
              <item>
               <widget class="QLabel" name="label_2">
+               <property name="font">
+                <font>
+                 <family>Microsoft YaHei UI</family>
+                 <pointsize>11</pointsize>
+                </font>
+               </property>
                <property name="text">
                 <string>Text：</string>
                </property>
@@ -278,6 +303,12 @@ QPushButton:pressed{border-image: url(:/redo-undo/redo-1.png);}</string>
                  <width>100</width>
                  <height>0</height>
                 </size>
+               </property>
+               <property name="font">
+                <font>
+                 <family>Microsoft YaHei UI</family>
+                 <pointsize>11</pointsize>
+                </font>
                </property>
               </widget>
              </item>
@@ -296,6 +327,12 @@ QPushButton:pressed{border-image: url(:/redo-undo/redo-1.png);}</string>
              </item>
              <item>
               <widget class="QLabel" name="label_search_word">
+               <property name="font">
+                <font>
+                 <family>Microsoft YaHei UI</family>
+                 <pointsize>11</pointsize>
+                </font>
+               </property>
                <property name="text">
                 <string>输入查询内容：</string>
                </property>
@@ -309,10 +346,22 @@ QPushButton:pressed{border-image: url(:/redo-undo/redo-1.png);}</string>
                  <height>0</height>
                 </size>
                </property>
+               <property name="font">
+                <font>
+                 <family>Microsoft YaHei UI</family>
+                 <pointsize>11</pointsize>
+                </font>
+               </property>
               </widget>
              </item>
              <item>
               <widget class="QPushButton" name="pushButton_search_word">
+               <property name="font">
+                <font>
+                 <family>Microsoft YaHei UI</family>
+                 <pointsize>11</pointsize>
+                </font>
+               </property>
                <property name="text">
                 <string>快查一下</string>
                </property>
@@ -327,6 +376,11 @@ QPushButton:pressed{border-image: url(:/redo-undo/redo-1.png);}</string>
          <layout class="QHBoxLayout" name="horizontalLayout_6" stretch="8,2">
           <item>
            <widget class="QTableWidget" name="tableWidget_search_word">
+            <property name="font">
+             <font>
+              <pointsize>11</pointsize>
+             </font>
+            </property>
             <column>
              <property name="text">
               <string>年份</string>
@@ -368,6 +422,11 @@ QPushButton:pressed{border-image: url(:/redo-undo/redo-1.png);}</string>
                  <height>16777215</height>
                 </size>
                </property>
+               <property name="font">
+                <font>
+                 <pointsize>10</pointsize>
+                </font>
+               </property>
               </widget>
              </item>
              <item>
@@ -391,6 +450,12 @@ QPushButton:pressed{border-image: url(:/redo-undo/redo-1.png);}</string>
        <layout class="QGridLayout" name="gridLayout_4" columnstretch="5,9">
         <item row="0" column="0">
          <widget class="QGroupBox" name="groupBox_3">
+          <property name="font">
+           <font>
+            <family>Microsoft YaHei UI</family>
+            <pointsize>10</pointsize>
+           </font>
+          </property>
           <property name="title">
            <string>范围设置</string>
           </property>
@@ -400,7 +465,7 @@ QPushButton:pressed{border-image: url(:/redo-undo/redo-1.png);}</string>
              <property name="font">
               <font>
                <family>Microsoft YaHei UI</family>
-               <pointsize>10</pointsize>
+               <pointsize>11</pointsize>
               </font>
              </property>
              <property name="text">
@@ -413,7 +478,7 @@ QPushButton:pressed{border-image: url(:/redo-undo/redo-1.png);}</string>
              <property name="font">
               <font>
                <family>Microsoft YaHei UI</family>
-               <pointsize>10</pointsize>
+               <pointsize>11</pointsize>
               </font>
              </property>
              <property name="maximum">
@@ -445,7 +510,7 @@ QPushButton:pressed{border-image: url(:/redo-undo/redo-1.png);}</string>
              <property name="font">
               <font>
                <family>Microsoft YaHei UI</family>
-               <pointsize>11</pointsize>
+               <pointsize>12</pointsize>
               </font>
              </property>
              <property name="text">
@@ -496,7 +561,7 @@ QPushButton:pressed{border-image: url(:/redo-undo/redo-1.png);}</string>
                 <property name="font">
                  <font>
                   <family>Microsoft YaHei UI</family>
-                  <pointsize>11</pointsize>
+                  <pointsize>12</pointsize>
                  </font>
                 </property>
                 <property name="text">
@@ -506,6 +571,12 @@ QPushButton:pressed{border-image: url(:/redo-undo/redo-1.png);}</string>
               </item>
               <item row="3" column="1">
                <widget class="QSpinBox" name="spinBox_text_from">
+                <property name="font">
+                 <font>
+                  <family>Microsoft YaHei UI</family>
+                  <pointsize>11</pointsize>
+                 </font>
+                </property>
                 <property name="minimum">
                  <number>0</number>
                 </property>
@@ -519,6 +590,12 @@ QPushButton:pressed{border-image: url(:/redo-undo/redo-1.png);}</string>
               </item>
               <item row="3" column="3">
                <widget class="QSpinBox" name="spinBox_text_to">
+                <property name="font">
+                 <font>
+                  <family>Microsoft YaHei UI</family>
+                  <pointsize>11</pointsize>
+                 </font>
+                </property>
                 <property name="maximum">
                  <number>6</number>
                 </property>
@@ -529,6 +606,12 @@ QPushButton:pressed{border-image: url(:/redo-undo/redo-1.png);}</string>
               </item>
               <item row="1" column="0">
                <widget class="QLabel" name="label_range_year">
+                <property name="font">
+                 <font>
+                  <family>Microsoft YaHei UI</family>
+                  <pointsize>11</pointsize>
+                 </font>
+                </property>
                 <property name="text">
                  <string>年份：</string>
                 </property>
@@ -542,6 +625,12 @@ QPushButton:pressed{border-image: url(:/redo-undo/redo-1.png);}</string>
                   <height>16777215</height>
                  </size>
                 </property>
+                <property name="font">
+                 <font>
+                  <family>Microsoft YaHei UI</family>
+                  <pointsize>11</pointsize>
+                 </font>
+                </property>
                 <property name="text">
                  <string>到</string>
                 </property>
@@ -549,6 +638,12 @@ QPushButton:pressed{border-image: url(:/redo-undo/redo-1.png);}</string>
               </item>
               <item row="1" column="1" colspan="3">
                <widget class="QSpinBox" name="spinBox_year">
+                <property name="font">
+                 <font>
+                  <family>Microsoft YaHei UI</family>
+                  <pointsize>11</pointsize>
+                 </font>
+                </property>
                 <property name="minimum">
                  <number>0</number>
                 </property>
@@ -572,6 +667,12 @@ QPushButton:pressed{border-image: url(:/redo-undo/redo-1.png);}</string>
               </item>
               <item row="3" column="0">
                <widget class="QLabel" name="label_range_text">
+                <property name="font">
+                 <font>
+                  <family>Microsoft YaHei UI</family>
+                  <pointsize>11</pointsize>
+                 </font>
+                </property>
                 <property name="text">
                  <string>Text：</string>
                 </property>
@@ -618,7 +719,7 @@ QPushButton:pressed{border-image: url(:/redo-undo/redo-1.png);}</string>
              </property>
              <property name="font">
               <font>
-               <pointsize>12</pointsize>
+               <pointsize>14</pointsize>
               </font>
              </property>
              <property name="text">
@@ -634,7 +735,7 @@ QPushButton:pressed{border-image: url(:/redo-undo/redo-1.png);}</string>
              <property name="font">
               <font>
                <family>Microsoft YaHei UI</family>
-               <pointsize>20</pointsize>
+               <pointsize>24</pointsize>
               </font>
              </property>
              <property name="text">
@@ -652,7 +753,7 @@ QPushButton:pressed{border-image: url(:/redo-undo/redo-1.png);}</string>
              </property>
              <property name="font">
               <font>
-               <pointsize>12</pointsize>
+               <pointsize>14</pointsize>
               </font>
              </property>
              <property name="text">
@@ -676,7 +777,7 @@ QPushButton:pressed{border-image: url(:/redo-undo/redo-1.png);}</string>
                <widget class="QLabel" name="label_finish">
                 <property name="font">
                  <font>
-                  <pointsize>12</pointsize>
+                  <pointsize>14</pointsize>
                  </font>
                 </property>
                 <property name="text">
@@ -688,7 +789,7 @@ QPushButton:pressed{border-image: url(:/redo-undo/redo-1.png);}</string>
                <widget class="QProgressBar" name="progressBar_finish">
                 <property name="font">
                  <font>
-                  <pointsize>12</pointsize>
+                  <pointsize>14</pointsize>
                  </font>
                 </property>
                 <property name="value">
@@ -727,7 +828,7 @@ QPushButton:pressed{border-image: url(:/redo-undo/redo-1.png);}</string>
                </property>
                <property name="font">
                 <font>
-                 <pointsize>11</pointsize>
+                 <pointsize>12</pointsize>
                 </font>
                </property>
                <property name="text">
@@ -758,7 +859,7 @@ QPushButton:pressed{border-image: url(:/redo-undo/redo-1.png);}</string>
                </property>
                <property name="font">
                 <font>
-                 <pointsize>11</pointsize>
+                 <pointsize>12</pointsize>
                 </font>
                </property>
                <property name="text">
@@ -789,7 +890,7 @@ QPushButton:pressed{border-image: url(:/redo-undo/redo-1.png);}</string>
                </property>
                <property name="font">
                 <font>
-                 <pointsize>11</pointsize>
+                 <pointsize>12</pointsize>
                 </font>
                </property>
                <property name="text">
@@ -819,7 +920,7 @@ QPushButton:pressed{border-image: url(:/redo-undo/redo-1.png);}</string>
              </property>
              <property name="font">
               <font>
-               <pointsize>14</pointsize>
+               <pointsize>16</pointsize>
               </font>
              </property>
              <property name="text">
@@ -886,7 +987,7 @@ QPushButton:pressed{border-image: url(:/redo-undo/redo-1.png);}</string>
           <property name="font">
            <font>
             <family>Microsoft YaHei UI</family>
-            <pointsize>9</pointsize>
+            <pointsize>10</pointsize>
            </font>
           </property>
           <property name="title">
@@ -895,6 +996,12 @@ QPushButton:pressed{border-image: url(:/redo-undo/redo-1.png);}</string>
           <layout class="QVBoxLayout" name="verticalLayout_5">
            <item>
             <widget class="QTableWidget" name="tableWidget_notebook">
+             <property name="font">
+              <font>
+               <family>Microsoft YaHei UI</family>
+               <pointsize>11</pointsize>
+              </font>
+             </property>
              <column>
               <property name="text">
                <string>权重</string>

@@ -16,10 +16,9 @@ from shutil import copyfile
 
 from PyQt5.QtGui import QIcon, QCursor, QKeySequence
 from PyQt5.QtWidgets import QWidget, QDesktopWidget, QApplication, QMainWindow, QMessageBox, QInputDialog, QFileDialog, \
-    QHeaderView, QTableWidgetItem, QAbstractItemView, QMenu, QUndoStack, QUndoCommand
+    QHeaderView, QTableWidgetItem, QAbstractItemView, QMenu, QUndoStack, QUndoCommand, QItemDelegate
 from guaWindow import Ui_MainWindow
 from PyQt5.QtCore import Qt, pyqtSlot, QTimer
-from PyQt5.QtSql import QSqlDatabase, QSqlQuery
 import sqlite3
 
 
@@ -34,9 +33,18 @@ class MWindow(QMainWindow, Ui_MainWindow):
         self.tabWidget.setCurrentIndex(0)
         self.save_box = QMessageBox(QMessageBox.Warning, '错误，找不到存档', '找不到本地存档，请选择：')
         self.tableWidget_add_word.setContextMenuPolicy(Qt.CustomContextMenu)
-        self.pushButton_search_word.setShortcut("Return")
-        self.pushButton_add_word_save.setShortcut("Ctrl+S")
+        self.tableWidget_notebook.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.pushButton_search_word.setShortcut(Qt.Key_Return)
+        self.pushButton_add_word_save.setShortcut(QKeySequence.Save)
+        self.pushButton_get_answer.setShortcut(QKeySequence.Cut)
+        self.pushButton_add_to_notebook.setShortcut(QKeySequence.SelectAll)
+        self.pushButton_next_word.setShortcut(QKeySequence.New)
+        self.pushButton_undo.setShortcut(QKeySequence.Undo)
+        self.pushButton_redo.setShortcut(QKeySequence.Redo)
+        # self.pushButton_notebook_undo.setShortcut(QKeySequence.Undo)
+        # self.pushButton_notebook_redo.setShortcut(QKeySequence.Redo)
         self.tableWidget_add_word.horizontalHeader().setVisible(True)
+        self.tableWidget_add_word.verticalHeader().setVisible(True)
         self.timer = QTimer()
         self.label_word.setDisabled(True)
         self.label_chinese_attr.setDisabled(True)
@@ -46,10 +54,19 @@ class MWindow(QMainWindow, Ui_MainWindow):
         self.progressBar_finish.setValue(0)
         self.lineEdit_input_attr.setDisabled(True)
         self.lineEdit_input_chinese.setDisabled(True)
+        for i in range(1, 6):
+            self.tableWidget_notebook.setItemDelegateForColumn(i, EmptyDelegate(self))
         # private variables
-        self.db = 'save.db'
+        self.db = 'guaDictateTool_save.db'
+        if os.name == 'nt':
+            self.db = os.path.expanduser(os.path.join('~\\Documents', self.db))
+        elif os.uname()[0] == 'Darwin':
+            self.db = os.path.expanduser(
+                os.path.join('~/Library/Mobile Documents/com~apple~CloudDocs/', self.db))
         self.undo_stack = QUndoStack()
+        self.undo_stack_notebook = QUndoStack()
         self.previous_cell_text = None
+        self.previous_cell_text_notebook = None
         self.dict_time = 30  # 默认每个单词思考30秒
         self.choices = None
         self.cur_dict_idx = 0
@@ -57,18 +74,23 @@ class MWindow(QMainWindow, Ui_MainWindow):
         # init actions
         self.undo_action = self.undo_stack.createUndoAction(self, '撤销')
         self.redo_action = self.undo_stack.createRedoAction(self, '重做')
-        self.undo_action.setShortcut(QKeySequence.Undo)
-        self.redo_action.setShortcut(QKeySequence.Redo)
+        # self.undo_action_notebook = self.undo_stack_notebook.createUndoAction(self, '撤销')
+        # self.redo_action_notebook = self.undo_stack_notebook.createRedoAction(self, '重做')
         self.addAction(self.undo_action)
         self.addAction(self.redo_action)
+        # self.addAction(self.undo_action_notebook)
+        # self.addAction(self.redo_action_notebook)
         # connect SIGNALS and SLOTS
         self.tableWidget_add_word.customContextMenuRequested.connect(self.tableWidget_add_word_showMenu)
+        self.tableWidget_notebook.customContextMenuRequested.connect(self.tableWidget_notebook_showMenu)
         self.tabWidget.currentChanged.connect(self.tabWidget_currentChanged)
         self.pushButton_add.clicked.connect(self.tableWidget_add_word_insert_behind)
         self.pushButton_remove.clicked.connect(self.tableWidget_add_word_delete_selected)
         self.pushButton_add_word_save.clicked.connect(self.pushButton_add_word_save_clicked)
         self.pushButton_undo.clicked.connect(self.undo_action.trigger)
         self.pushButton_redo.clicked.connect(self.redo_action.trigger)
+        # self.pushButton_notebook_undo.clicked.connect(self.undo_action_notebook.trigger)
+        # self.pushButton_notebook_redo.clicked.connect(self.redo_action_notebook.trigger)
         # self.tableWidget_add_word.currentItemChanged.connect(
         #     self.tableWidget_add_word_currentItemChanged)
         # self.tableWidget_add_word.dataChanged.connect(self.tableWidget_add_word_currentItemChanged)
@@ -87,10 +109,14 @@ class MWindow(QMainWindow, Ui_MainWindow):
         self.pushButton_get_answer.clicked.connect(self.pushButton_get_answer_clicked)
         self.pushButton_add_to_notebook.clicked.connect(self.pushButton_add_to_notebook_clicked)
         self.pushButton_next_word.clicked.connect(self.pushButton_next_word_clicked)
+        self.tableWidget_notebook.cellDoubleClicked.connect(self.tableWidget_notebook_cellDoubleClicked)
+        self.tableWidget_notebook.itemChanged.connect(self.tableWidget_notebook_itemChanged)
         # actions after init
         self._check_db_exist()
         self._flush_tab_1()
         self._flush_tab_2()
+        self._flush_tab_3()
+        self._flush_tab_4()
 
     # 检查存档是否存在
     def _check_db_exist(self):
@@ -223,6 +249,7 @@ class MWindow(QMainWindow, Ui_MainWindow):
         # 设置表格内容
         set_data_to_tableWidget(self.tableWidget_search_word, data)
 
+    # 重置听写界面ui
     def _reset_dict_ui(self):
         self.label_word.setText('单词在这里')
         self.label_word.setDisabled(True)
@@ -238,6 +265,7 @@ class MWindow(QMainWindow, Ui_MainWindow):
         self.pushButton_get_answer.setDisabled(False)
         self.pushButton_add_to_notebook.setDisabled(False)
 
+    # 听写界面切换单词
     def _show_word(self):
         # ui相关
         self._reset_dict_ui()
@@ -293,9 +321,9 @@ class MWindow(QMainWindow, Ui_MainWindow):
         self.comboBox_year.addItem('不限')
         self.comboBox_lesson.addItem('不限')
         # self.comboBox_year.setCurrentIndex()
+        conn = self._connect_to_db()
+        cur = conn.cursor()
         try:
-            conn = self._connect_to_db()
-            cur = conn.cursor()
             # 查询所有不重复的year（可能为空）
             cur.execute("select distinct year from dict order by year desc")
             years = [str(year[0]) for year in cur.fetchall()]
@@ -316,6 +344,23 @@ class MWindow(QMainWindow, Ui_MainWindow):
         self.tableWidget_search_word.clearContents()
         data = self._get_sql_data("SELECT * FROM dict ORDER BY year DESC, text, word")
         set_data_to_tableWidget(self.tableWidget_search_word, data)
+
+    # 刷新听写页面
+    def _flush_tab_3(self):
+        pass
+
+    # 刷新复习单词本页面
+    def _flush_tab_4(self):
+        # undoStack相关
+        self.previous_cell_text_notebook = None
+        self.undo_stack_notebook.clear()
+        # tableWidget相关
+        self.tableWidget_notebook.clearContents()
+        data = self._get_sql_data("SELECT count,dict.word,attr,chinese,year,text "
+                                  "FROM dict JOIN notebook n ON dict.word = n.word "
+                                  "WHERE count > 0 "
+                                  "ORDER BY n.count DESC, dict.word")
+        set_data_to_tableWidget(self.tableWidget_notebook, data)
 
     ################## 槽函数（SLOT） #################
 
@@ -351,8 +396,17 @@ class MWindow(QMainWindow, Ui_MainWindow):
         pop_menu = QMenu(self.tableWidget_add_word)
         insert_action = pop_menu.addAction('添加一行')
         delete_action = pop_menu.addAction('删除选中的行')
+        add_to_notebook = pop_menu.addAction('添加到单词复习本')
         insert_action.triggered.connect(lambda: self.tableWidget_add_word_insert(pos))
         delete_action.triggered.connect(self.tableWidget_add_word_delete_selected)
+        add_to_notebook.triggered.connect(lambda: self.tableWidget_add_word_add_to_notebook(pos))
+        pop_menu.exec_(QCursor.pos())
+
+    # 在tableWidget_notebook上单击右键时触发右键菜单
+    def tableWidget_notebook_showMenu(self, pos):
+        pop_menu = QMenu(self.tableWidget_notebook)
+        delete_action = pop_menu.addAction('删除选中的行')
+        delete_action.triggered.connect(self.tableWidget_notebook_delete_selected)
         pop_menu.exec_(QCursor.pos())
 
     # def tableWidget_add_word_delete(self, pos):
@@ -369,6 +423,18 @@ class MWindow(QMainWindow, Ui_MainWindow):
         delete_selection = DeleteSelectedCommand(self.tableWidget_add_word, row_ids)
         self.undo_stack.push(delete_selection)
 
+    # 在tableWidget_notebook中删除选中行
+    def tableWidget_notebook_delete_selected(self):
+        rows = self.tableWidget_notebook.selectionModel().selectedRows()
+        if len(rows) == 0:
+            return
+        row_ids = [r.row() for r in rows]  # 获得需要删除的行号的list
+        row_ids.sort(key=int, reverse=True)  # 用sort方法将list进行降序排列
+        for r in row_ids:
+            self._change_sql_data(f"delete from notebook where word = '{self.tableWidget_notebook.item(r, 1).text()}'")
+            self.tableWidget_notebook.removeRow(r)
+        self._flush_tab_4()
+
     # 在tableWidget_add_word中鼠标右键位置插入
     def tableWidget_add_word_insert(self, pos):
         row_id = self.tableWidget_add_word.rowAt(pos.y())
@@ -379,6 +445,17 @@ class MWindow(QMainWindow, Ui_MainWindow):
     def tableWidget_add_word_insert_behind(self):
         insert = InsertCommand(self.tableWidget_add_word, self.tableWidget_add_word.rowCount())
         self.undo_stack.push(insert)
+
+    # 在tableWidget_add_word中鼠标右键添加到单词复习本
+    def tableWidget_add_word_add_to_notebook(self, pos):
+        row_id = self.tableWidget_add_word.rowAt(pos.y())
+        word = self.tableWidget_add_word.item(row_id, 2).text()
+        data = self._get_sql_data(f"select count from notebook where word = '{word}'")
+        if len(data) > 0 and data[0][0] > 0:
+            pass
+        else:
+            self._change_sql_data(f"replace into notebook(word,count) values ('{word}',1)")
+            self._flush_tab_4()
 
     # 点击加新词页面的”SAVE“按钮后触发
     def pushButton_add_word_save_clicked(self):
@@ -417,6 +494,7 @@ class MWindow(QMainWindow, Ui_MainWindow):
             conn.close()
             self.setWindowTitle('LTH的单词听写机')
         self._flush_tab_2()
+        self._flush_tab_4()
 
     # 加新词页面表格的内容修改后触发
     def tableWidget_add_word_itemChanged(self):
@@ -426,8 +504,9 @@ class MWindow(QMainWindow, Ui_MainWindow):
         row = self.previous_cell_text[0]
         col = self.previous_cell_text[1]
         text = self.previous_cell_text[2]
-        if self.tableWidget_add_word.item(row, col).text() != text:
-            change_item = ChangeItemCommand(self.tableWidget_add_word, row, col, text)
+        cur_text = self.tableWidget_add_word.item(row, col).text()
+        if cur_text != text:
+            change_item = ChangeItemCommand(self.tableWidget_add_word, row, col, text, cur_text)
             self.undo_stack.push(change_item)
         self.previous_cell_text = None
 
@@ -439,6 +518,30 @@ class MWindow(QMainWindow, Ui_MainWindow):
         # self.tableWidget_add_word.cellActivated()
         text = item.text() if item is not None else ''
         self.previous_cell_text = (row, col, text)
+
+    # 复习单词本页面表格的内容修改后触发
+    def tableWidget_notebook_itemChanged(self):
+        print(f'tableWidget_notebook_itemChanged: {self.previous_cell_text_notebook}')
+        if self.previous_cell_text_notebook is None:
+            return
+        row = self.previous_cell_text_notebook[0]
+        col = self.previous_cell_text_notebook[1]
+        text = self.previous_cell_text_notebook[2]
+        cur_text = self.tableWidget_notebook.item(row, col).text()
+        if cur_text != text:
+            self._change_sql_data(
+                f"update notebook set count='{cur_text}' where word='{self.tableWidget_notebook.item(row, 1).text()}'")
+            self._flush_tab_4()
+        self.previous_cell_text_notebook = None
+
+    # 双击单词复习本页面表格的单元格时触发
+    def tableWidget_notebook_cellDoubleClicked(self, row, col):
+        item = self.tableWidget_notebook.item(row, col)
+        print(
+            f'tableWidget_notebook_cellDoubleClicked: row {row}, col {col}, item {item}')
+        # self.tableWidget_add_word.cellActivated()
+        text = item.text() if item is not None else ''
+        self.previous_cell_text_notebook = (row, col, text)
 
     # 点击”快查一下“时触发
     @pyqtSlot()
@@ -496,6 +599,7 @@ class MWindow(QMainWindow, Ui_MainWindow):
         else:
             self._start_dict(data)
 
+    # 听写页面计时器timeout时触发
     def timer_timeout(self):
         if self.dict_time > 0:
             if self.dict_time <= 5:
@@ -504,8 +608,11 @@ class MWindow(QMainWindow, Ui_MainWindow):
             self.lcdNumber_timer.display(self.dict_time)
             self.timer.start(1000)  # 开始下一秒的计时
         else:
-            QMessageBox.information(self, '已超时', '超时啦，自动添加到错题本')
-            self.pushButton_add_to_notebook_clicked()
+            if self.pushButton_add_to_notebook.isEnabled():
+                QMessageBox.information(self, '已超时', '超时啦，自动添加到错题本')
+                self.pushButton_add_to_notebook_clicked()
+            else:
+                QMessageBox.information(self, '已超时', '超时啦，你好像已经手动添加到错题本了')
             self.timer.stop()
             self.pushButton_next_word_clicked()
 
@@ -526,9 +633,13 @@ class MWindow(QMainWindow, Ui_MainWindow):
         self.pushButton_add_to_notebook.setDisabled(True)
         cur_choice = self.choices[self.cur_dict_idx]
         word = cur_choice[0]
-        count = cur_choice[3] + 1
-        sql_query = f"replace into notebook(word,count) values ('{word}',{count})"
-        self._change_sql_data(sql_query)
+        data = self._get_sql_data(f"select count from notebook where word = '{word}'")
+        if len(data) > 0 and data[0][0] > 0:
+            count = data[0][0] + 1
+        else:
+            count = 1
+        self._change_sql_data(f"replace into notebook(word,count) values ('{word}','{count}')")
+        self._flush_tab_4()
         self.pushButton_get_answer_clicked()
 
     # 点击听写页面的”下一个“时触发
@@ -612,17 +723,18 @@ class DeleteSelectedCommand(QUndoCommand):
 
 
 class ChangeItemCommand(QUndoCommand):
-    def __init__(self, table, row, col, text):
+    def __init__(self, table, row, col, text, cur_text):
         super(ChangeItemCommand, self).__init__()
         self.table = table
         self.row = row
         self.col = col
         self.text = text
+        self.cur_text = cur_text
         self.main_window = table.parent().parent().parent().parent().parent().parent()
 
     def redo(self):
+        self.table.item(self.row, self.col).setText(self.cur_text)
         self.main_window.setWindowTitle('LTH的单词听写机（未保存！！）')
-        pass
 
     def undo(self):
         self.table.item(self.row, self.col).setText(self.text)
@@ -632,6 +744,14 @@ class ChangeItemCommand(QUndoCommand):
         #     f'count:{self.main_window.undo_stack.count()} index:{}')
         if self.main_window.undo_stack.index() == 1:
             self.main_window.setWindowTitle('LTH的单词听写机')
+
+
+class EmptyDelegate(QItemDelegate):
+    def __init__(self, parent):
+        super(EmptyDelegate, self).__init__(parent)
+
+    def createEditor(self, QWidget, QStyleOptionViewItem, QModelIndex):
+        return None
 
 
 # 从tableWidget读取内容到data

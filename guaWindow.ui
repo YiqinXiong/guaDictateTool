@@ -18,7 +18,7 @@
     <item row="0" column="0">
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>3</number>
       </property>
       <widget class="QWidget" name="tab_1">
        <attribute name="title">
@@ -160,7 +160,7 @@ QPushButton:pressed{border-image: url(:/redo-undo/redo-1.png);}</string>
                <property name="font">
                 <font>
                  <family>Showcard Gothic</family>
-                 <pointsize>12</pointsize>
+                 <pointsize>14</pointsize>
                 </font>
                </property>
                <property name="text">
@@ -175,7 +175,7 @@ QPushButton:pressed{border-image: url(:/redo-undo/redo-1.png);}</string>
              <property name="font">
               <font>
                <family>Microsoft YaHei UI</family>
-               <pointsize>11</pointsize>
+               <pointsize>12</pointsize>
               </font>
              </property>
              <property name="contextMenuPolicy">
@@ -378,7 +378,7 @@ QPushButton:pressed{border-image: url(:/redo-undo/redo-1.png);}</string>
            <widget class="QTableWidget" name="tableWidget_search_word">
             <property name="font">
              <font>
-              <pointsize>11</pointsize>
+              <pointsize>12</pointsize>
              </font>
             </property>
             <column>
@@ -424,7 +424,7 @@ QPushButton:pressed{border-image: url(:/redo-undo/redo-1.png);}</string>
                </property>
                <property name="font">
                 <font>
-                 <pointsize>10</pointsize>
+                 <pointsize>11</pointsize>
                 </font>
                </property>
               </widget>
@@ -999,7 +999,7 @@ QPushButton:pressed{border-image: url(:/redo-undo/redo-1.png);}</string>
              <property name="font">
               <font>
                <family>Microsoft YaHei UI</family>
-               <pointsize>11</pointsize>
+               <pointsize>12</pointsize>
               </font>
              </property>
              <column>

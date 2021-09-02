@@ -15,8 +15,8 @@ import sys
 from shutil import copyfile
 
 from PyQt5.QtGui import QIcon, QCursor, QKeySequence
-from PyQt5.QtWidgets import QWidget, QDesktopWidget, QApplication, QMainWindow, QMessageBox, QInputDialog, QFileDialog, \
-    QHeaderView, QTableWidgetItem, QAbstractItemView, QMenu, QUndoStack, QUndoCommand, QItemDelegate
+from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QFileDialog, QHeaderView, QTableWidgetItem, \
+    QAbstractItemView, QMenu, QUndoStack, QUndoCommand, QItemDelegate
 from guaWindow import Ui_MainWindow
 from PyQt5.QtCore import Qt, pyqtSlot, QTimer
 import sqlite3

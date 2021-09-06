@@ -779,12 +779,17 @@ def get_data_from_tableWidget(table_widget, rows, cols):
 # 设置tableWidget的显示内容（从sqlite读取数据）
 def set_data_to_tableWidget(table, data):
     table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+    table.horizontalHeader().setMinimumSectionSize(80)
+    for col in range(table.columnCount()):
+        if table.horizontalHeaderItem(col).text() not in ('单词', '中文'):
+            table.horizontalHeader().setSectionResizeMode(col, QHeaderView.ResizeToContents)
+
     table.setSelectionBehavior(QAbstractItemView.SelectRows)
     table.setRowCount(len(data))
     for i, row in enumerate(data):
         for j, item in enumerate(row):
             item = QTableWidgetItem(str(item))
-            item.setTextAlignment(Qt.AlignJustify | Qt.AlignVCenter)
+            item.setTextAlignment(Qt.AlignJustify | Qt.AlignVCenter | Qt.AlignHCenter)
             table.setItem(i, j, item)
 
 

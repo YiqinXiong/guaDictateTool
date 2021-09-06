@@ -778,11 +778,14 @@ def get_data_from_tableWidget(table_widget, rows, cols):
 
 # 设置tableWidget的显示内容（从sqlite读取数据）
 def set_data_to_tableWidget(table, data):
-    table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
     table.horizontalHeader().setMinimumSectionSize(80)
     for col in range(table.columnCount()):
         if table.horizontalHeaderItem(col).text() not in ('单词', '中文'):
             table.horizontalHeader().setSectionResizeMode(col, QHeaderView.ResizeToContents)
+        elif table.horizontalHeaderItem(col).text() == '单词':
+            table.setColumnWidth(col, 240)
+        else:
+            table.horizontalHeader().setSectionResizeMode(col, QHeaderView.Stretch)
 
     table.setSelectionBehavior(QAbstractItemView.SelectRows)
     table.setRowCount(len(data))

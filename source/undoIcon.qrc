@@ -7,6 +7,14 @@
     <file>redo.png</file>
     <file>undo.png</file>
   </qresource>
+  <qresource prefix="import-export">
+    <file>export.png</file>
+    <file>export-1.png</file>
+    <file>export-2.png</file>
+    <file>import.png</file>
+    <file>import-1.png</file>
+    <file>import-2.png</file>
+  </qresource>
   <qresource prefix="icon">
     <file>icon.png</file>
   </qresource>

@@ -18,7 +18,7 @@
     <item row="0" column="0">
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>3</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tab_1">
        <attribute name="title">
@@ -36,183 +36,305 @@
           <property name="title">
            <string>往词典里添加新单词，宝贝可以自己修改添加</string>
           </property>
-          <layout class="QGridLayout" name="gridLayout_11">
-           <item row="1" column="0">
-            <layout class="QHBoxLayout" name="horizontalLayout_5">
+          <layout class="QVBoxLayout" name="verticalLayout_9">
+           <item>
+            <layout class="QVBoxLayout" name="verticalLayout_8">
              <item>
-              <widget class="QPushButton" name="pushButton_add">
-               <property name="minimumSize">
-                <size>
-                 <width>36</width>
-                 <height>36</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>36</width>
-                 <height>36</height>
-                </size>
-               </property>
+              <layout class="QHBoxLayout" name="horizontalLayout_10">
+               <item>
+                <spacer name="horizontalSpacer_11">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>40</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+               <item>
+                <widget class="QPushButton" name="pushButton_import">
+                 <property name="minimumSize">
+                  <size>
+                   <width>50</width>
+                   <height>50</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>50</width>
+                   <height>50</height>
+                  </size>
+                 </property>
+                 <property name="statusTip">
+                  <string>从excel导入</string>
+                 </property>
+                 <property name="whatsThis">
+                  <string>从excel导入</string>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">QPushButton{border-image: url(:/import-export/import.png);}
+QPushButton:hover{border-image: url(:/import-export/import-1.png);}
+QPushButton:pressed{border-image: url(:/import-export/import-2.png);}</string>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <spacer name="horizontalSpacer_10">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>40</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+               <item>
+                <widget class="QPushButton" name="pushButton_export">
+                 <property name="minimumSize">
+                  <size>
+                   <width>50</width>
+                   <height>50</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>50</width>
+                   <height>50</height>
+                  </size>
+                 </property>
+                 <property name="statusTip">
+                  <string>导出为excel</string>
+                 </property>
+                 <property name="whatsThis">
+                  <string>导出为excel</string>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">QPushButton{border-image: url(:/import-export/export.png);}
+QPushButton:hover{border-image: url(:/import-export/export-1.png);}
+QPushButton:pressed{border-image: url(:/import-export/export-2.png);}</string>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <spacer name="horizontalSpacer_12">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>40</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QTableWidget" name="tableWidget_add_word">
                <property name="font">
                 <font>
-                 <family>Consolas</family>
-                 <pointsize>20</pointsize>
-                 <weight>75</weight>
-                 <italic>false</italic>
-                 <bold>true</bold>
+                 <family>Microsoft YaHei UI</family>
+                 <pointsize>12</pointsize>
                 </font>
                </property>
-               <property name="text">
-                <string>+</string>
+               <property name="contextMenuPolicy">
+                <enum>Qt::CustomContextMenu</enum>
                </property>
+               <attribute name="horizontalHeaderVisible">
+                <bool>false</bool>
+               </attribute>
+               <attribute name="verticalHeaderVisible">
+                <bool>false</bool>
+               </attribute>
+               <column>
+                <property name="text">
+                 <string>年份</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>Text</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>单词</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>词性</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>中文</string>
+                </property>
+               </column>
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="pushButton_remove">
-               <property name="minimumSize">
-                <size>
-                 <width>36</width>
-                 <height>36</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>36</width>
-                 <height>36</height>
-                </size>
-               </property>
-               <property name="font">
-                <font>
-                 <family>Consolas</family>
-                 <pointsize>20</pointsize>
-                 <weight>75</weight>
-                 <bold>true</bold>
-                </font>
-               </property>
-               <property name="text">
-                <string>—</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <spacer name="horizontalSpacer_6">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-             <item>
-              <widget class="QPushButton" name="pushButton_undo">
-               <property name="minimumSize">
-                <size>
-                 <width>36</width>
-                 <height>36</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>36</width>
-                 <height>36</height>
-                </size>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">QPushButton{border-image: url(:/redo-undo/undo.png);}
+              <layout class="QHBoxLayout" name="horizontalLayout_5">
+               <item>
+                <widget class="QPushButton" name="pushButton_add">
+                 <property name="minimumSize">
+                  <size>
+                   <width>36</width>
+                   <height>36</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>36</width>
+                   <height>36</height>
+                  </size>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <family>Consolas</family>
+                   <pointsize>20</pointsize>
+                   <weight>75</weight>
+                   <italic>false</italic>
+                   <bold>true</bold>
+                  </font>
+                 </property>
+                 <property name="statusTip">
+                  <string>新增行</string>
+                 </property>
+                 <property name="text">
+                  <string>+</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="pushButton_remove">
+                 <property name="minimumSize">
+                  <size>
+                   <width>36</width>
+                   <height>36</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>36</width>
+                   <height>36</height>
+                  </size>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <family>Consolas</family>
+                   <pointsize>20</pointsize>
+                   <weight>75</weight>
+                   <bold>true</bold>
+                  </font>
+                 </property>
+                 <property name="statusTip">
+                  <string>删除所选行</string>
+                 </property>
+                 <property name="text">
+                  <string>—</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <spacer name="horizontalSpacer_6">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>40</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+               <item>
+                <widget class="QPushButton" name="pushButton_undo">
+                 <property name="minimumSize">
+                  <size>
+                   <width>36</width>
+                   <height>36</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>36</width>
+                   <height>36</height>
+                  </size>
+                 </property>
+                 <property name="statusTip">
+                  <string>撤销</string>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">QPushButton{border-image: url(:/redo-undo/undo.png);}
 QPushButton:hover{border-image: url(:/redo-undo/undo-2.png);}
 QPushButton:pressed{border-image: url(:/redo-undo/undo-1.png);}</string>
-               </property>
-               <property name="text">
-                <string/>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="pushButton_redo">
-               <property name="minimumSize">
-                <size>
-                 <width>36</width>
-                 <height>36</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>36</width>
-                 <height>36</height>
-                </size>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">QPushButton{border-image: url(:/redo-undo/redo.png);}
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="pushButton_redo">
+                 <property name="minimumSize">
+                  <size>
+                   <width>36</width>
+                   <height>36</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>36</width>
+                   <height>36</height>
+                  </size>
+                 </property>
+                 <property name="statusTip">
+                  <string>重做</string>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">QPushButton{border-image: url(:/redo-undo/redo.png);}
 QPushButton:hover{border-image: url(:/redo-undo/redo-2.png);}
 QPushButton:pressed{border-image: url(:/redo-undo/redo-1.png);}</string>
-               </property>
-               <property name="text">
-                <string/>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="pushButton_add_word_save">
-               <property name="font">
-                <font>
-                 <family>Showcard Gothic</family>
-                 <pointsize>14</pointsize>
-                </font>
-               </property>
-               <property name="text">
-                <string>SAVE</string>
-               </property>
-              </widget>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="pushButton_add_word_save">
+                 <property name="font">
+                  <font>
+                   <family>Showcard Gothic</family>
+                   <pointsize>14</pointsize>
+                  </font>
+                 </property>
+                 <property name="statusTip">
+                  <string>保存修改</string>
+                 </property>
+                 <property name="text">
+                  <string>SAVE</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
              </item>
             </layout>
-           </item>
-           <item row="0" column="0" colspan="2">
-            <widget class="QTableWidget" name="tableWidget_add_word">
-             <property name="font">
-              <font>
-               <family>Microsoft YaHei UI</family>
-               <pointsize>12</pointsize>
-              </font>
-             </property>
-             <property name="contextMenuPolicy">
-              <enum>Qt::CustomContextMenu</enum>
-             </property>
-             <attribute name="horizontalHeaderVisible">
-              <bool>false</bool>
-             </attribute>
-             <attribute name="verticalHeaderVisible">
-              <bool>false</bool>
-             </attribute>
-             <column>
-              <property name="text">
-               <string>年份</string>
-              </property>
-             </column>
-             <column>
-              <property name="text">
-               <string>Text</string>
-              </property>
-             </column>
-             <column>
-              <property name="text">
-               <string>单词</string>
-              </property>
-             </column>
-             <column>
-              <property name="text">
-               <string>词性</string>
-              </property>
-             </column>
-             <column>
-              <property name="text">
-               <string>中文</string>
-              </property>
-             </column>
-            </widget>
            </item>
           </layout>
          </widget>
@@ -465,7 +587,7 @@ QPushButton:pressed{border-image: url(:/redo-undo/redo-1.png);}</string>
              <property name="font">
               <font>
                <family>Microsoft YaHei UI</family>
-               <pointsize>11</pointsize>
+               <pointsize>12</pointsize>
               </font>
              </property>
              <property name="text">
@@ -478,7 +600,7 @@ QPushButton:pressed{border-image: url(:/redo-undo/redo-1.png);}</string>
              <property name="font">
               <font>
                <family>Microsoft YaHei UI</family>
-               <pointsize>11</pointsize>
+               <pointsize>12</pointsize>
               </font>
              </property>
              <property name="maximum">
@@ -510,7 +632,7 @@ QPushButton:pressed{border-image: url(:/redo-undo/redo-1.png);}</string>
              <property name="font">
               <font>
                <family>Microsoft YaHei UI</family>
-               <pointsize>12</pointsize>
+               <pointsize>14</pointsize>
               </font>
              </property>
              <property name="text">
@@ -561,7 +683,7 @@ QPushButton:pressed{border-image: url(:/redo-undo/redo-1.png);}</string>
                 <property name="font">
                  <font>
                   <family>Microsoft YaHei UI</family>
-                  <pointsize>12</pointsize>
+                  <pointsize>14</pointsize>
                  </font>
                 </property>
                 <property name="text">
@@ -574,7 +696,7 @@ QPushButton:pressed{border-image: url(:/redo-undo/redo-1.png);}</string>
                 <property name="font">
                  <font>
                   <family>Microsoft YaHei UI</family>
-                  <pointsize>11</pointsize>
+                  <pointsize>12</pointsize>
                  </font>
                 </property>
                 <property name="minimum">
@@ -593,7 +715,7 @@ QPushButton:pressed{border-image: url(:/redo-undo/redo-1.png);}</string>
                 <property name="font">
                  <font>
                   <family>Microsoft YaHei UI</family>
-                  <pointsize>11</pointsize>
+                  <pointsize>12</pointsize>
                  </font>
                 </property>
                 <property name="maximum">
@@ -609,7 +731,7 @@ QPushButton:pressed{border-image: url(:/redo-undo/redo-1.png);}</string>
                 <property name="font">
                  <font>
                   <family>Microsoft YaHei UI</family>
-                  <pointsize>11</pointsize>
+                  <pointsize>12</pointsize>
                  </font>
                 </property>
                 <property name="text">
@@ -628,7 +750,7 @@ QPushButton:pressed{border-image: url(:/redo-undo/redo-1.png);}</string>
                 <property name="font">
                  <font>
                   <family>Microsoft YaHei UI</family>
-                  <pointsize>11</pointsize>
+                  <pointsize>12</pointsize>
                  </font>
                 </property>
                 <property name="text">
@@ -641,7 +763,7 @@ QPushButton:pressed{border-image: url(:/redo-undo/redo-1.png);}</string>
                 <property name="font">
                  <font>
                   <family>Microsoft YaHei UI</family>
-                  <pointsize>11</pointsize>
+                  <pointsize>12</pointsize>
                  </font>
                 </property>
                 <property name="minimum">
@@ -670,7 +792,7 @@ QPushButton:pressed{border-image: url(:/redo-undo/redo-1.png);}</string>
                 <property name="font">
                  <font>
                   <family>Microsoft YaHei UI</family>
-                  <pointsize>11</pointsize>
+                  <pointsize>12</pointsize>
                  </font>
                 </property>
                 <property name="text">
@@ -709,57 +831,18 @@ QPushButton:pressed{border-image: url(:/redo-undo/redo-1.png);}</string>
            <string>答题区</string>
           </property>
           <layout class="QGridLayout" name="gridLayout_8">
-           <item row="6" column="0">
-            <widget class="QLabel" name="label_input_chinese">
-             <property name="maximumSize">
-              <size>
-               <width>60</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <pointsize>14</pointsize>
-              </font>
-             </property>
-             <property name="text">
-              <string>中文：</string>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="0" colspan="3" alignment="Qt::AlignHCenter">
-            <widget class="QLabel" name="label_word">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
-             <property name="font">
-              <font>
-               <family>Microsoft YaHei UI</family>
-               <pointsize>24</pointsize>
-              </font>
-             </property>
-             <property name="text">
-              <string>单词在这里</string>
-             </property>
-            </widget>
-           </item>
            <item row="5" column="0">
-            <widget class="QLabel" name="label_input_attr">
-             <property name="maximumSize">
+            <spacer name="horizontalSpacer_8">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
               <size>
-               <width>60</width>
-               <height>16777215</height>
+               <width>40</width>
+               <height>20</height>
               </size>
              </property>
-             <property name="font">
-              <font>
-               <pointsize>14</pointsize>
-              </font>
-             </property>
-             <property name="text">
-              <string>词性：</string>
-             </property>
-            </widget>
+            </spacer>
            </item>
            <item row="0" column="0" colspan="3">
             <widget class="QGroupBox" name="groupBox_6">
@@ -777,7 +860,7 @@ QPushButton:pressed{border-image: url(:/redo-undo/redo-1.png);}</string>
                <widget class="QLabel" name="label_finish">
                 <property name="font">
                  <font>
-                  <pointsize>14</pointsize>
+                  <pointsize>16</pointsize>
                  </font>
                 </property>
                 <property name="text">
@@ -789,7 +872,7 @@ QPushButton:pressed{border-image: url(:/redo-undo/redo-1.png);}</string>
                <widget class="QProgressBar" name="progressBar_finish">
                 <property name="font">
                  <font>
-                  <pointsize>14</pointsize>
+                  <pointsize>16</pointsize>
                  </font>
                 </property>
                 <property name="value">
@@ -800,10 +883,38 @@ QPushButton:pressed{border-image: url(:/redo-undo/redo-1.png);}</string>
              </layout>
             </widget>
            </item>
-           <item row="5" column="1" colspan="2">
-            <widget class="QLineEdit" name="lineEdit_input_attr"/>
+           <item row="5" column="1">
+            <widget class="QLabel" name="label_attr">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>14</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>词性在这里</string>
+             </property>
+            </widget>
            </item>
-           <item row="7" column="0" colspan="3">
+           <item row="4" column="0" colspan="3" alignment="Qt::AlignHCenter">
+            <widget class="QLabel" name="label_word">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="font">
+              <font>
+               <family>Microsoft YaHei UI</family>
+               <pointsize>26</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>单词在这里</string>
+             </property>
+            </widget>
+           </item>
+           <item row="10" column="0" colspan="3">
             <layout class="QHBoxLayout" name="horizontalLayout">
              <item>
               <spacer name="horizontalSpacer">
@@ -828,7 +939,7 @@ QPushButton:pressed{border-image: url(:/redo-undo/redo-1.png);}</string>
                </property>
                <property name="font">
                 <font>
-                 <pointsize>12</pointsize>
+                 <pointsize>14</pointsize>
                 </font>
                </property>
                <property name="text">
@@ -859,7 +970,7 @@ QPushButton:pressed{border-image: url(:/redo-undo/redo-1.png);}</string>
                </property>
                <property name="font">
                 <font>
-                 <pointsize>12</pointsize>
+                 <pointsize>14</pointsize>
                 </font>
                </property>
                <property name="text">
@@ -890,7 +1001,7 @@ QPushButton:pressed{border-image: url(:/redo-undo/redo-1.png);}</string>
                </property>
                <property name="font">
                 <font>
-                 <pointsize>12</pointsize>
+                 <pointsize>14</pointsize>
                 </font>
                </property>
                <property name="text">
@@ -913,18 +1024,18 @@ QPushButton:pressed{border-image: url(:/redo-undo/redo-1.png);}</string>
              </item>
             </layout>
            </item>
-           <item row="4" column="0" colspan="3" alignment="Qt::AlignHCenter">
-            <widget class="QLabel" name="label_chinese_attr">
+           <item row="7" column="0" colspan="3" alignment="Qt::AlignHCenter">
+            <widget class="QLabel" name="label_chinese">
              <property name="enabled">
               <bool>false</bool>
              </property>
              <property name="font">
               <font>
-               <pointsize>16</pointsize>
+               <pointsize>18</pointsize>
               </font>
              </property>
              <property name="text">
-              <string>词性和中文在这里</string>
+              <string>中文在这里</string>
              </property>
             </widget>
            </item>
@@ -945,7 +1056,7 @@ QPushButton:pressed{border-image: url(:/redo-undo/redo-1.png);}</string>
                 <property name="font">
                  <font>
                   <family>Microsoft YaHei UI</family>
-                  <pointsize>14</pointsize>
+                  <pointsize>16</pointsize>
                  </font>
                 </property>
                 <property name="text">
@@ -969,8 +1080,69 @@ QPushButton:pressed{border-image: url(:/redo-undo/redo-1.png);}</string>
              </layout>
             </widget>
            </item>
-           <item row="6" column="1" colspan="2">
-            <widget class="QLineEdit" name="lineEdit_input_chinese"/>
+           <item row="5" column="2">
+            <spacer name="horizontalSpacer_9">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item row="9" column="0" colspan="3">
+            <widget class="QGroupBox" name="groupBox_9">
+             <property name="title">
+              <string/>
+             </property>
+             <layout class="QGridLayout" name="gridLayout_2">
+              <item row="2" column="1" rowspan="2">
+               <widget class="QLabel" name="label_input_chinese">
+                <property name="maximumSize">
+                 <size>
+                  <width>60</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <pointsize>14</pointsize>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>中文：</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="2">
+               <widget class="QLineEdit" name="lineEdit_input_chinese"/>
+              </item>
+              <item row="1" column="1">
+               <widget class="QLabel" name="label_input_attr">
+                <property name="maximumSize">
+                 <size>
+                  <width>60</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <pointsize>14</pointsize>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>词性：</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="2">
+               <widget class="QLineEdit" name="lineEdit_input_attr"/>
+              </item>
+             </layout>
+            </widget>
            </item>
           </layout>
          </widget>

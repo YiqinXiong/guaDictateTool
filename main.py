@@ -12,6 +12,7 @@ Create: August 2021
 import os
 import random
 import sys
+import time
 from shutil import copyfile
 
 from PyQt5.QtGui import QIcon, QCursor, QKeySequence
@@ -47,7 +48,8 @@ class MWindow(QMainWindow, Ui_MainWindow):
         self.tableWidget_add_word.verticalHeader().setVisible(True)
         self.timer = QTimer()
         self.label_word.setDisabled(True)
-        self.label_chinese_attr.setDisabled(True)
+        self.label_attr.setDisabled(True)
+        self.label_chinese.setDisabled(True)
         self.pushButton_get_answer.setDisabled(True)
         self.pushButton_add_to_notebook.setDisabled(True)
         self.pushButton_next_word.setDisabled(True)
@@ -111,6 +113,9 @@ class MWindow(QMainWindow, Ui_MainWindow):
         self.pushButton_next_word.clicked.connect(self.pushButton_next_word_clicked)
         self.tableWidget_notebook.cellDoubleClicked.connect(self.tableWidget_notebook_cellDoubleClicked)
         self.tableWidget_notebook.itemChanged.connect(self.tableWidget_notebook_itemChanged)
+        self.pushButton_import.clicked.connect(self.import_excel)
+        self.pushButton_export.clicked.connect(self.export_excel)
+
         # actions after init
         self._check_db_exist()
         self._flush_tab_1()
@@ -137,19 +142,20 @@ class MWindow(QMainWindow, Ui_MainWindow):
             else:
                 self._create_new_db()
                 if self.save_box.clickedButton() == from_excel:
-                    file_name = QFileDialog.getOpenFileName(self, '选取Excel文件', '', 'Excel(*.xls, *.xlsx)')
-                    if file_name[0]:
-                        self._import_excel_to_sqlite(file_name[0])
+                    self._import_excel_to_sqlite()
 
     # 从excel读取内容到sqlite
-    def _import_excel_to_sqlite(self, excel_file_path):
+    def _import_excel_to_sqlite(self):
+        file_name = QFileDialog.getOpenFileName(self, '选取Excel文件', '', 'Excel(*.xls, *.xlsx)')
+        if not file_name[0]:
+            return
+        excel_file_path = file_name[0]
         # 读取excel内容
         import xlrd
         data = xlrd.open_workbook(excel_file_path)
         dict_sheet = data.sheet_by_index(0)
         if dict_sheet.ncols != 5:
             QMessageBox.warning(self, 'excel解析错误', '此excel格式不符，请检查')
-            self.create_new_db()
             return
         dict_data = [tuple(dict_sheet.row_values(row_idx)) for row_idx in range(1, dict_sheet.nrows)]
         if len(data.sheets()) == 2:
@@ -253,8 +259,10 @@ class MWindow(QMainWindow, Ui_MainWindow):
     def _reset_dict_ui(self):
         self.label_word.setText('单词在这里')
         self.label_word.setDisabled(True)
-        self.label_chinese_attr.setText('词性和中文在这里')
-        self.label_chinese_attr.setDisabled(True)
+        self.label_attr.setText('词性在这里')
+        self.label_attr.setDisabled(True)
+        self.label_chinese.setText('中文在这里')
+        self.label_chinese.setDisabled(True)
         self.label_finish.setText(f'完成{self.cur_dict_idx} / {self.progressBar_finish.maximum()}')
         self.progressBar_finish.setValue(self.cur_dict_idx)
         self.lcdNumber_timer.setStyleSheet("")
@@ -621,8 +629,10 @@ class MWindow(QMainWindow, Ui_MainWindow):
         try:
             self.pushButton_get_answer.setDisabled(True)
             cur_choice = self.choices[self.cur_dict_idx]
-            self.label_chinese_attr.setDisabled(False)
-            self.label_chinese_attr.setText(f'{cur_choice[1]}  {cur_choice[2]}')
+            self.label_attr.setDisabled(False)
+            self.label_chinese.setDisabled(False)
+            self.label_attr.setText(f'{cur_choice[1]}')
+            self.label_chinese.setText(f'{cur_choice[2]}')
         except Exception as e:
             print(f'pushButton_get_answer_clicked:{e}')
 
@@ -669,6 +679,71 @@ class MWindow(QMainWindow, Ui_MainWindow):
                 self._show_word()
         except Exception as e:
             print(f'pushButton_next_word_clicked: {e}')
+
+    # 点击导入时触发
+    @pyqtSlot()
+    def import_excel(self):
+        # 创建备份、新建db
+        backup_db_path = self.db + ".bak"
+        if os.path.exists(backup_db_path):
+            os.remove(backup_db_path)
+        os.rename(self.db, backup_db_path)
+        self._create_new_db()
+        # 导入excel
+        self._import_excel_to_sqlite()
+        # 刷新页面
+        self.undo_stack.clear()
+        self._flush_tab_1()
+        self._flush_tab_2()
+        self._flush_tab_3()
+        self._flush_tab_4()
+
+    # 点击导出时触发
+    @pyqtSlot()
+    def export_excel(self):
+        # 获取保存路径
+        now_time = time.strftime("%Y%m%d-%H%M", time.localtime())
+        xls_path = QFileDialog.getSaveFileName(self, '选取Excel文件', f'{now_time}_guaDictate导出', 'Excel(*.xls)')
+        if not xls_path[0]:
+            QMessageBox.warning(self, '保存错误', '保存路径选取有误，请重试！')
+            return
+        xls_path = xls_path[0]
+
+        # 保存内容
+        self.pushButton_add_word_save_clicked()
+
+        # 读取sql内容
+        dict_header = ["年份", "Text", "单词", "词性", "中文"]
+        notebook_header = ["单词", "出错次数"]
+        dict_data = self._get_sql_data("SELECT * FROM dict ORDER BY year DESC, text, word")
+        notebook_data = self._get_sql_data("SELECT dict.word,count "
+                                           "FROM dict JOIN notebook n ON dict.word = n.word "
+                                           "WHERE count > 0 "
+                                           "ORDER BY n.count DESC, dict.word")
+
+        # 写入到excel
+        import xlwt
+        # 创建excel文件, 如果已有就会覆盖
+        workbook = xlwt.Workbook(encoding='utf-8')
+        # 创建新的工作表
+        workbook.add_sheet('dict')
+        workbook.add_sheet('notebook')
+        dict_sheet = workbook.get_sheet(0)
+        notebook_sheet = workbook.get_sheet(1)
+        # 写入dict表
+        for i, h in enumerate(dict_header):
+            dict_sheet.write(0, i, h)
+        for rn, row in enumerate(dict_data):
+            for cn, item in enumerate(row):
+                dict_sheet.write(rn + 1, cn, item)
+        # 写入notebook表
+        for i, h in enumerate(notebook_header):
+            notebook_sheet.write(0, i, h)
+        for rn, row in enumerate(notebook_data):
+            for cn, item in enumerate(row):
+                notebook_sheet.write(rn + 1, cn, item)
+        # 保存
+        workbook.save(xls_path)
 
 
 class InsertCommand(QUndoCommand):

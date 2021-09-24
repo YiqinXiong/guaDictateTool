@@ -169,9 +169,9 @@ class MWindow(QMainWindow, Ui_MainWindow):
         conn = self._connect_to_db(db_name)
         cur = conn.cursor()
         try:
-            cur.executemany("INSERT INTO dict VALUES (?,?,?,?,?)", dict_data)
+            cur.executemany("REPLACE INTO dict VALUES (?,?,?,?,?)", dict_data)
             if len(data.sheets()) == 2:
-                cur.executemany("INSERT INTO notebook VALUES (?,?)", notebook_data)
+                cur.executemany("REPLACE INTO notebook VALUES (?,?)", notebook_data)
             conn.commit()
         except Exception as e:
             print(f'_import_excel_to_sqlite: {e}')

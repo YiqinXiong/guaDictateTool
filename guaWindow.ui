@@ -69,10 +69,10 @@
                   </size>
                  </property>
                  <property name="statusTip">
-                  <string>从excel导入</string>
+                  <string>从excel或db导入</string>
                  </property>
                  <property name="whatsThis">
-                  <string>从excel导入</string>
+                  <string>从excel或db导入</string>
                  </property>
                  <property name="styleSheet">
                   <string notr="true">QPushButton{border-image: url(:/import-export/import.png);}

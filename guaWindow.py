@@ -563,8 +563,8 @@ class Ui_MainWindow(object):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
         self.groupBox_11.setTitle(_translate("MainWindow", "往词典里添加新单词，宝贝可以自己修改添加"))
-        self.pushButton_import.setStatusTip(_translate("MainWindow", "从excel导入"))
-        self.pushButton_import.setWhatsThis(_translate("MainWindow", "从excel导入"))
+        self.pushButton_import.setStatusTip(_translate("MainWindow", "从excel或db导入"))
+        self.pushButton_import.setWhatsThis(_translate("MainWindow", "从excel或db导入"))
         self.pushButton_export.setStatusTip(_translate("MainWindow", "导出为excel"))
         self.pushButton_export.setWhatsThis(_translate("MainWindow", "导出为excel"))
         item = self.tableWidget_add_word.horizontalHeaderItem(0)

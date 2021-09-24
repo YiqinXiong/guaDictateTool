@@ -33,6 +33,12 @@ class MWindow(QMainWindow, Ui_MainWindow):
         self.setWindowTitle('LTH的单词听写机')
         self.tabWidget.setCurrentIndex(0)
         self.save_box = QMessageBox(QMessageBox.Warning, '错误，找不到存档', '找不到本地存档，请选择：')
+        self.import_box = QMessageBox(QMessageBox.Information, '选择导入方式', '你想以哪种方式导入，请选择：')
+        self.import_from_excel = self.import_box.addButton('从Excel导入', QMessageBox.ActionRole)
+        self.import_from_db = self.import_box.addButton('从.db文件导入', QMessageBox.ActionRole)
+        self.import_from_new = self.import_box.addButton('新建存档', QMessageBox.ActionRole)
+        self.import_cancel = self.import_box.addButton('取消', QMessageBox.RejectRole)
+        self.import_box.setDefaultButton(self.import_cancel)
         self.tableWidget_add_word.setContextMenuPolicy(Qt.CustomContextMenu)
         self.tableWidget_notebook.setContextMenuPolicy(Qt.CustomContextMenu)
         self.pushButton_search_word.setShortcut(Qt.Key_Return)
@@ -140,16 +146,14 @@ class MWindow(QMainWindow, Ui_MainWindow):
                 if file_name[0]:
                     copyfile(file_name[0], self.db)
             else:
-                self._create_new_db()
+                create_new_db(self.db)
                 if self.save_box.clickedButton() == from_excel:
-                    self._import_excel_to_sqlite()
+                    file_name = QFileDialog.getOpenFileName(self, '选取Excel文件', '', 'Excel(*.xls *.xlsx)')
+                    if file_name[0]:
+                        self._import_excel_to_sqlite(file_name[0], self.db)
 
     # 从excel读取内容到sqlite
-    def _import_excel_to_sqlite(self):
-        file_name = QFileDialog.getOpenFileName(self, '选取Excel文件', '', 'Excel(*.xls, *.xlsx)')
-        if not file_name[0]:
-            return
-        excel_file_path = file_name[0]
+    def _import_excel_to_sqlite(self, excel_file_path, db_name):
         # 读取excel内容
         import xlrd
         data = xlrd.open_workbook(excel_file_path)
@@ -162,7 +166,7 @@ class MWindow(QMainWindow, Ui_MainWindow):
             notebook_sheet = data.sheet_by_index(1)
             notebook_data = [tuple(notebook_sheet.row_values(row_idx)) for row_idx in range(1, notebook_sheet.nrows)]
         # 写入数据库
-        conn = self._connect_to_db()
+        conn = self._connect_to_db(db_name)
         cur = conn.cursor()
         try:
             cur.executemany("INSERT INTO dict VALUES (?,?,?,?,?)", dict_data)
@@ -178,7 +182,7 @@ class MWindow(QMainWindow, Ui_MainWindow):
 
     # 对sqlite进行[查]操作
     def _get_sql_data(self, sql_query):
-        conn = self._connect_to_db()
+        conn = self._connect_to_db(self.db)
         cur = conn.cursor()
         try:
             cur.execute(sql_query)
@@ -193,7 +197,7 @@ class MWindow(QMainWindow, Ui_MainWindow):
 
     # 对sqlite进行[增删改]操作
     def _change_sql_data(self, sql_query):
-        conn = self._connect_to_db()
+        conn = self._connect_to_db(self.db)
         cur = conn.cursor()
         try:
             cur.execute(sql_query)
@@ -205,33 +209,13 @@ class MWindow(QMainWindow, Ui_MainWindow):
             cur.close()
             conn.close()
 
-    # sqlite的create table建立dict和notebook两个表的结构
-    def _create_new_db(self):
-        conn = sqlite3.connect(self.db)
-        cur = conn.cursor()
-        try:
-            cur.execute(
-                "CREATE TABLE IF NOT EXISTS "
-                "dict(year INTEGER,text INTEGER,word TEXT NOT NULL PRIMARY KEY,attr TEXT,chinese TEXT)")
-            cur.execute(
-                "CREATE TABLE IF NOT EXISTS "
-                "notebook(word TEXT NOT NULL PRIMARY KEY,count INTEGER,"
-                "CONSTRAINT FK_Notebook FOREIGN KEY (word) REFERENCES dict(word))")
-            conn.commit()
-        except Exception as e:
-            print(f'_create_new_db: {e}')
-            conn.rollback()
-        finally:
-            cur.close()
-            conn.close()
-
     # 连接到sqlite，返回conn
-    def _connect_to_db(self):
+    def _connect_to_db(self, db_name):
         if self.db == "":
             QMessageBox.warning(self, '打开词典数据库失败', '数据库文件路径为空')
             return None
         # 指定SQLite数据库的文件名
-        conn = sqlite3.connect(self.db)
+        conn = sqlite3.connect(db_name)
         return conn
 
     # 连接到sqlite，执行search的查询任务
@@ -329,7 +313,7 @@ class MWindow(QMainWindow, Ui_MainWindow):
         self.comboBox_year.addItem('不限')
         self.comboBox_lesson.addItem('不限')
         # self.comboBox_year.setCurrentIndex()
-        conn = self._connect_to_db()
+        conn = self._connect_to_db(self.db)
         cur = conn.cursor()
         try:
             # 查询所有不重复的year（可能为空）
@@ -471,7 +455,7 @@ class MWindow(QMainWindow, Ui_MainWindow):
         col_count = self.tableWidget_add_word.columnCount()
         data = get_data_from_tableWidget(self.tableWidget_add_word, list(range(row_count)), list(range(col_count)))
         # 写入数据库
-        conn = self._connect_to_db()
+        conn = self._connect_to_db(self.db)
         cur = conn.cursor()
         try:
             # # 备份notebook的数据
@@ -683,14 +667,36 @@ class MWindow(QMainWindow, Ui_MainWindow):
     # 点击导入时触发
     @pyqtSlot()
     def import_excel(self):
-        # 创建备份、新建db
-        backup_db_path = self.db + ".bak"
+        temp_db_path = self.db[:self.db.rfind('.')] + '_temp.db'
+        backup_db_path = self.db[:self.db.rfind('.')] + '_bak.db'
+
+        self.import_box.exec_()
+
+        if self.import_box.clickedButton() == self.import_cancel:
+            return
+        elif self.import_box.clickedButton() == self.import_from_db:
+            file_name = QFileDialog.getOpenFileName(self, '选取词典数据库文件', '', 'SQLite Database(*.db)')
+            if file_name[0] and (file_name[0] != self.db):
+                copyfile(file_name[0], temp_db_path)
+            else:
+                return
+        elif self.import_box.clickedButton() == self.import_from_excel:
+            file_name = QFileDialog.getOpenFileName(self, '选取Excel文件', '', 'Excel(*.xls *.xlsx)')
+            if file_name[0]:
+                create_new_db(temp_db_path)
+                self._import_excel_to_sqlite(file_name[0], temp_db_path)
+            else:
+                return
+        else:
+            create_new_db(temp_db_path)
+        # 创建备份
         if os.path.exists(backup_db_path):
             os.remove(backup_db_path)
         os.rename(self.db, backup_db_path)
-        self._create_new_db()
-        # 导入excel
-        self._import_excel_to_sqlite()
+        # 用temp_db覆盖self.db
+        if os.path.exists(self.db):
+            os.remove(self.db)
+        os.rename(temp_db_path, self.db)
         # 刷新页面
         self.undo_stack.clear()
         self._flush_tab_1()
@@ -826,6 +832,27 @@ class EmptyDelegate(QItemDelegate):
 
     def createEditor(self, QWidget, QStyleOptionViewItem, QModelIndex):
         return None
+
+
+# sqlite的create table建立dict和notebook两个表的结构
+def create_new_db(db_name):
+    conn = sqlite3.connect(db_name)
+    cur = conn.cursor()
+    try:
+        cur.execute(
+            "CREATE TABLE IF NOT EXISTS "
+            "dict(year INTEGER,text INTEGER,word TEXT NOT NULL PRIMARY KEY,attr TEXT,chinese TEXT)")
+        cur.execute(
+            "CREATE TABLE IF NOT EXISTS "
+            "notebook(word TEXT NOT NULL PRIMARY KEY,count INTEGER,"
+            "CONSTRAINT FK_Notebook FOREIGN KEY (word) REFERENCES dict(word))")
+        conn.commit()
+    except Exception as e:
+        print(f'create_new_db: {e}')
+        conn.rollback()
+    finally:
+        cur.close()
+        conn.close()
 
 
 # 从tableWidget读取内容到data
